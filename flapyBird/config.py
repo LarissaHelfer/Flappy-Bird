@@ -1,0 +1,8 @@
+# config.py
+LARGURA = 800
+ALTURA = 600
+
+TUNEL_LARGURA = 80
+TUNEL_GAP = 200
+TUNEL_VELOCIDADE = 200
+TUNEL_INTERVALO = 2 # tempo em segundos
