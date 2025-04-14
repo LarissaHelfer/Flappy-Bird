@@ -1,1 +1,1 @@
-# vidas extras voando, conforme x pontuacao aumenta a velocidade
+# vidas extras voando, conforme x pontuacao aumenta a velocidade 
