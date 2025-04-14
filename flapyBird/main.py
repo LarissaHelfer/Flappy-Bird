@@ -34,10 +34,10 @@ def main():
             evento = tempo_atual
 
         for tunel in tuneis:
-            tunel.update(delta_tempo)
-            tunel.draw()
+            tunel.atualiza(delta_tempo)
+            tunel.desenha()
 
-        tuneis = [t for t in tuneis if not t.is_offscreen()]
+        tuneis = [t for t in tuneis if not t.esta_tela()]
 
         glfw.swap_buffers(window)
         glfw.poll_events()
