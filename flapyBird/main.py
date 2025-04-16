@@ -3,6 +3,7 @@ from OpenGL.GL import *
 import time
 from config import *
 from objetos.tunel import Tunel
+from utils.utils import carregar_bmp, criar_textura, desenhar_fundo
 
 def main():
     if not glfw.init():
@@ -17,6 +18,9 @@ def main():
     glLoadIdentity()
     glOrtho(0, LARGURA, 0, ALTURA, -1, 1)
 
+    largura_img, altura_img, dados = carregar_bmp("flapyBird/assets/fundo.bmp")
+    textura_fundo = criar_textura(largura_img, altura_img, dados)
+
     tuneis = []
     evento = time.time()
     frame = time.time()
@@ -28,6 +32,9 @@ def main():
 
         glClearColor(0.0, 0.0, 0.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT)
+
+        # Desenha o fundo
+        desenhar_fundo(textura_fundo, LARGURA, ALTURA)
 
         if tempo_atual - evento > TUNEL_INTERVALO:
             tuneis.append(Tunel())
