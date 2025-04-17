@@ -1,4 +1,3 @@
-# config.py
 LARGURA = 800
 ALTURA = 600
 
