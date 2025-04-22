@@ -36,14 +36,15 @@ class VidaExtra:
         glTexCoord2f(0, 0); glVertex2f(self.x, self.y + self.altura)
         glEnd()
 
-    def checar_colisao(self, dragao):
+    def checar_colisao_hitbox(self, hitbox):
         if not self.visivel:
             return False
+
         return (
-            self.x < dragao.x + dragao.largura and
-            self.x + self.largura > dragao.x and
-            self.y < dragao.y + dragao.altura and
-            self.y + self.altura > dragao.y
+            self.x < hitbox["x2"] and
+            self.x + self.largura > hitbox["x1"] and
+            self.y < hitbox["y2"] and
+            self.y + self.altura > hitbox["y1"]
         )
 
 def carregar_textura(caminho):

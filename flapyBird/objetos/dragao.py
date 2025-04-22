@@ -32,4 +32,10 @@ def carregar_textura_dragao(path):
     return id_textura
 
 def get_hitbox(y_dragao):
-    return (x, y_dragao, x + largura, y_dragao + altura_sprite)
+    margem = 10 
+    return {
+        "x1": x + margem,
+        "x2": x + largura - margem,
+        "y1": y_dragao + margem,
+        "y2": y_dragao + altura_sprite - margem
+    }

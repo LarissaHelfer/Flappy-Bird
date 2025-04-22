@@ -2,13 +2,13 @@ import glfw
 from OpenGL.GL import *
 import time
 import random
+import math
 
 from config import *
 from objetos.tunel import Tunel
-from objetos.extras import VidaExtra, carregar_textura
+from objetos.extras import VidaExtra
 from objetos.dragao import desenhar_dragao, carregar_textura_dragao, get_hitbox
-from utils.utils import carregar_bmp, criar_textura, desenhar_fundo
-
+from utils.utils import carregar_image, criar_textura, desenhar_fundo, desenhar_texto
 
 def main():
     if not glfw.init():
@@ -33,14 +33,13 @@ def main():
     glLoadIdentity()
 
     try:
-        textura_inicio = criar_textura(*carregar_bmp("flapyBird/assets/FrameInicial.bmp"))
-        textura_jogo = criar_textura(*carregar_bmp("flapyBird/assets/FrameContinuo.bmp"))
-        textura_fim = criar_textura(*carregar_bmp("flapyBird/assets/YouDied.bmp"))
-        textura_vida = criar_textura(*carregar_bmp("flapyBird/assets/vida_24bit.bmp"))
+        textura_inicio = criar_textura(*carregar_image("flapyBird/assets/FrameInicial.png"))
+        textura_jogo = criar_textura(*carregar_image("flapyBird/assets/FrameContinuo.png"))
+        textura_fim = criar_textura(*carregar_image("flapyBird/assets/YouDied.bmp"))
+        textura_vida = criar_textura(*carregar_image("flapyBird/assets/vida_24bit.bmp"))
         textura_dragao = carregar_textura_dragao("flapyBird/assets/dragon1.png")
-        # dragao = dragao(textura_dragao)
     except Exception as e:
-        print(f"Erro ao carregar texturas: {e}")
+        print(f"Erro nas texturas, veja aqui")
         glfw.terminate()
         return
 
@@ -52,17 +51,16 @@ def main():
     inicio_jogo = None
     contador_tuneis = 0
     vidas = 3
-    y_dragao = 300  # Posição vertical inicial (meio da tela)
+    y_dragao = 300
     velocidade = 0
-    gravidade = -800  # Pixels por segundo² (negativo = descendo)
-    impulso = 300
     colidindo_agora = False
     colidiu_anteriormente = False
     invulneravel = False
     tempo_invulneravel = 0
 
     def key_callback(window, key, scancode, action, mods):
-        nonlocal estado, ultimo_tunel, frame_anterior, inicio_jogo, tuneis, vidas_extras, vidas, contador_tuneis
+        nonlocal estado, ultimo_tunel, frame_anterior, inicio_jogo
+        nonlocal tuneis, vidas_extras, vidas, contador_tuneis, velocidade, y_dragao
         if key == glfw.KEY_SPACE and action == glfw.PRESS:
             if estado == "inicio":
                 estado = "jogando"
@@ -72,8 +70,8 @@ def main():
                 vidas_extras = []
                 vidas = 3
                 contador_tuneis = 0
-                # dragao.pular()
-                velocidade = impulso
+                velocidade = IMPULSO
+                y_dragao = 300
             elif estado == "fim":
                 estado = "inicio"
 
@@ -96,6 +94,16 @@ def main():
         if estado == "inicio":
             desenhar_fundo(textura_inicio, LARGURA, ALTURA)
 
+            y_flutuante = 300 + 20 * math.sin(tempo_atual * 2)
+            desenhar_dragao(textura_dragao, y_flutuante)
+
+            alpha = abs(math.sin(tempo_atual * 3))
+            glEnable(GL_BLEND)
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+            glColor4f(1.0, 1.0, 1.0, alpha)
+            desenhar_texto(LARGURA // 2 - 60, ALTURA // 2 -(-50), "START", tamanho=32)
+            glColor4f(1.0, 1.0, 1.0, 1.0)
+
         elif estado == "jogando":
             desenhar_fundo(textura_jogo, LARGURA, ALTURA)
             desenhar_dragao(textura_dragao, y_dragao)
@@ -113,65 +121,63 @@ def main():
 
             glPushAttrib(GL_ENABLE_BIT)
 
+            hitbox_dragao = get_hitbox(y_dragao)
 
             for tunel in tuneis[:]:
                 tunel.atualiza(delta_tempo)
                 tunel.desenha()
 
-                # Verifica colisão com o túnel
-                if tunel.verifica_colisao(get_hitbox(y_dragao)):
+                if tunel.verifica_colisao(hitbox_dragao) and not invulneravel:
                     colidindo_agora = True
 
-                # Verifica se já passou o túnel (para pontuar)
                 if not tunel.passou and tunel.x + tunel.largura < 100:
                     tunel.passou = True
                     contador_tuneis += 1
 
-                # Remove se saiu da tela
                 if tunel.esta_tela():
                     tuneis.remove(tunel)
 
-            if colidindo_agora and not invulneravel:
+            if colidindo_agora:
                 vidas -= 1
-                print("Vida perdida. Vidas restantes:", vidas)
                 invulneravel = True
                 tempo_invulneravel = tempo_atual
                 colidindo_agora = False
                 if vidas <= 0:
                     estado = "fim"
-            else:
-                colidiu_anteriormente = False
+
             glPopAttrib()
 
             for vida in vidas_extras[:]:
                 vida.atualizar(TUNEL_VELOCIDADE * delta_tempo)
                 vida.desenhar_vidas()
 
-                # if vida.checar_colisao(dragao):
-                #     vidas += 1
-                #     vida.visivel = False
+                if vida.checar_colisao_hitbox(hitbox_dragao):
+                    vidas += 1
+                    vida.visivel = False
 
                 if not vida.visivel:
                     vidas_extras.remove(vida)
 
+
             if tempo_atual - inicio_jogo > 200:
                 estado = "fim"
 
-            # dragon
-            # Aplica física
-            velocidade += gravidade * delta_tempo
+            velocidade += GRAVIDADE * delta_tempo
             y_dragao += velocidade * delta_tempo
 
-            # Limita o dragão dentro da tela
             if y_dragao < 0:
                 y_dragao = 0
                 velocidade = 0
-            if y_dragao > 600 - 80:  # 80 = altura do sprite  // 600 altura da tela
-                y_dragao = 600 - 80
+            if y_dragao > ALTURA - 80:
+                y_dragao = ALTURA - 80
                 velocidade = 0
 
             if glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-                velocidade = impulso
+                velocidade = IMPULSO
+
+            glColor3f(1.0, 1.0, 1.0)
+            desenhar_texto(20, ALTURA - 40, f"Vidas: {vidas}", tamanho=28)
+            desenhar_texto(20, ALTURA - 80, f"Pontos: {contador_tuneis}", tamanho=28)
 
 
         elif estado == "fim":
