@@ -33,11 +33,12 @@ def main():
     glLoadIdentity()
 
     try:
-        textura_inicio = criar_textura(*carregar_bmp("assets/FrameInicial.bmp"))
-        textura_jogo = criar_textura(*carregar_bmp("assets/FrameContinuo.bmp"))
-        textura_fim = criar_textura(*carregar_bmp("assets/YouDied.bmp"))
-        textura_dragao = carregar_textura_dragao("assets/dragon1.png")
-
+        textura_inicio = criar_textura(*carregar_bmp("flapyBird/assets/FrameInicial.bmp"))
+        textura_jogo = criar_textura(*carregar_bmp("flapyBird/assets/FrameContinuo.bmp"))
+        textura_fim = criar_textura(*carregar_bmp("flapyBird/assets/YouDied.bmp"))
+        textura_vida = criar_textura(*carregar_bmp("flapyBird/assets/vida_24bit.bmp"))
+        textura_dragao = carregar_textura_dragao("flapyBird/assets/dragon1.png")
+        # dragao = dragao(textura_dragao)
     except Exception as e:
         print(f"Erro ao carregar texturas: {e}")
         glfw.terminate()
@@ -45,6 +46,7 @@ def main():
 
     estado = "inicio"
     tuneis = []
+    vidas_extras = []
     ultimo_tunel = time.time()
     frame_anterior = time.time()
     inicio_jogo = None
@@ -60,13 +62,14 @@ def main():
     tempo_invulneravel = 0
 
     def key_callback(window, key, scancode, action, mods):
-        nonlocal estado, ultimo_tunel, frame_anterior, inicio_jogo, tuneis, vidas, contador_tuneis
+        nonlocal estado, ultimo_tunel, frame_anterior, inicio_jogo, tuneis, vidas_extras, vidas, contador_tuneis
         if key == glfw.KEY_SPACE and action == glfw.PRESS:
             if estado == "inicio":
                 estado = "jogando"
                 inicio_jogo = time.time()
                 frame_anterior = time.time()
                 tuneis = []
+                vidas_extras = []
                 vidas = 3
                 contador_tuneis = 0
                 # dragao.pular()
@@ -104,6 +107,7 @@ def main():
 
                 if contador_tuneis % 5 == 0:
                     y_aleatorio = random.randint(150, ALTURA - 150)
+                    vidas_extras.append(VidaExtra(LARGURA, y_aleatorio, textura_vida))
 
                 ultimo_tunel = tempo_atual
 
@@ -138,6 +142,17 @@ def main():
             else:
                 colidiu_anteriormente = False
             glPopAttrib()
+
+            for vida in vidas_extras[:]:
+                vida.atualizar(TUNEL_VELOCIDADE * delta_tempo)
+                vida.desenhar_vidas()
+
+                # if vida.checar_colisao(dragao):
+                #     vidas += 1
+                #     vida.visivel = False
+
+                if not vida.visivel:
+                    vidas_extras.remove(vida)
 
             if tempo_atual - inicio_jogo > 200:
                 estado = "fim"
