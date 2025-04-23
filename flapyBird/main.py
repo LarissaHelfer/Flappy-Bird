@@ -38,6 +38,7 @@ def main():
         textura_fim = criar_textura(*carregar_image("flapyBird/assets/YouDied.bmp"))
         textura_vida = carregar_textura("flapyBird/assets/vida.png")
         textura_dragao = carregar_textura("flapyBird/assets/dragon1.png")
+        textura_tunel = carregar_textura("flapyBird/assets/textura_tuneis.png")
     except Exception as e:
         print(f"Erro nas texturas, veja aqui")
         glfw.terminate()
@@ -129,7 +130,7 @@ def main():
             desenhar_dragao(textura_dragao, y_dragao)
 
             if tempo_atual - ultimo_tunel > tunel_intervalo:
-                novo_tunel = Tunel()
+                novo_tunel = Tunel(textura_tunel)
                 tuneis.append(novo_tunel)
 
                 if contador_tuneis % 5 == 0:
