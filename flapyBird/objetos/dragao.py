@@ -19,7 +19,7 @@ def desenhar_dragao(textura_id, y_dragao):
 
     glDisable(GL_TEXTURE_2D)
 
-def carregar_textura_dragao(path):
+def carregar_textura(path):
     imagem = Image.open(path)
     imagem = imagem.transpose(Image.FLIP_TOP_BOTTOM)
     img_data = np.array(imagem.convert("RGBA"), dtype=np.uint8)

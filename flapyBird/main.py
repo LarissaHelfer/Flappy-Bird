@@ -7,7 +7,7 @@ import math
 from config import *
 from objetos.tunel import Tunel
 from objetos.extras import VidaExtra
-from objetos.dragao import desenhar_dragao, carregar_textura_dragao, get_hitbox
+from objetos.dragao import desenhar_dragao, carregar_textura, get_hitbox
 from utils.utils import carregar_image, criar_textura, desenhar_fundo, desenhar_texto
 
 def main():
@@ -36,13 +36,15 @@ def main():
         textura_inicio = criar_textura(*carregar_image("flapyBird/assets/FrameInicial.png"))
         textura_jogo = criar_textura(*carregar_image("flapyBird/assets/FrameContinuo.png"))
         textura_fim = criar_textura(*carregar_image("flapyBird/assets/YouDied.bmp"))
-        textura_vida = criar_textura(*carregar_image("flapyBird/assets/vida_24bit.bmp"))
-        textura_dragao = carregar_textura_dragao("flapyBird/assets/dragon1.png")
+        textura_vida = carregar_textura("flapyBird/assets/vida.png")
+        textura_dragao = carregar_textura("flapyBird/assets/dragon1.png")
     except Exception as e:
         print(f"Erro nas texturas, veja aqui")
         glfw.terminate()
         return
-
+    
+    tunel_velocidade = TUNEL_VELOCIDADE_INICIAL
+    tunel_intervalo = TUNEL_INTERVALO
     estado = "inicio"
     tuneis = []
     vidas_extras = []
@@ -110,7 +112,7 @@ def main():
             # dragao.atualizar(delta_tempo)
             # dragao.desenhar()
 
-            if tempo_atual - ultimo_tunel > TUNEL_INTERVALO:
+            if tempo_atual - ultimo_tunel > tunel_intervalo:
                 tuneis.append(Tunel())
 
                 if contador_tuneis % 5 == 0:
@@ -158,9 +160,15 @@ def main():
                 if not vida.visivel:
                     vidas_extras.remove(vida)
 
+            # aqui dificulta
+            if contador_tuneis % 10 == 0 and contador_tuneis != 0:
+                if (contador_tuneis // 10) > ((contador_tuneis - 1) // 10):
+                    tunel_velocidade += 7
+                    tunel_intervalo = max(0.8, tunel_intervalo - 0.1)
 
-            if tempo_atual - inicio_jogo > 200:
-                estado = "fim"
+ 
+            # if tempo_atual - inicio_jogo > 200:
+            #     estado = "fim"
 
             velocidade += GRAVIDADE * delta_tempo
             y_dragao += velocidade * delta_tempo
@@ -176,7 +184,20 @@ def main():
                 velocidade = IMPULSO
 
             glColor3f(1.0, 1.0, 1.0)
-            desenhar_texto(20, ALTURA - 40, f"Vidas: {vidas}", tamanho=28)
+            for i in range(vidas):
+                x_vida = 20 + i * 40  # Espaçamento horizontal entre os corações
+                y_vida = ALTURA - 40
+                glBindTexture(GL_TEXTURE_2D, textura_vida)
+                glEnable(GL_TEXTURE_2D)
+
+                glBegin(GL_QUADS)
+                glTexCoord2f(0.0, 0.0); glVertex2f(x_vida, y_vida)
+                glTexCoord2f(1.0, 0.0); glVertex2f(x_vida + 32, y_vida)
+                glTexCoord2f(1.0, 1.0); glVertex2f(x_vida + 32, y_vida + 32)
+                glTexCoord2f(0.0, 1.0); glVertex2f(x_vida, y_vida + 32)
+                glEnd()
+
+                glDisable(GL_TEXTURE_2D)
             desenhar_texto(20, ALTURA - 80, f"Pontos: {contador_tuneis}", tamanho=28)
 
 
