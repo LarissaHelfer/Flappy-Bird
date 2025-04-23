@@ -33,11 +33,11 @@ def main():
     glLoadIdentity()
 
     try:
-        textura_inicio = criar_textura(*carregar_image("assets/FrameInicial.png"))
-        textura_jogo = carregar_textura("assets/fundoSimples.png")
-        textura_fim = criar_textura(*carregar_image("assets/YouDied.bmp"))
-        textura_vida = carregar_textura("assets/vida.png")
-        textura_dragao = carregar_textura("assets/dragon1.png")
+        textura_inicio = criar_textura(*carregar_image("flapyBird/assets/FrameInicial.png"))
+        textura_jogo = carregar_textura("flapyBird/assets/fundoSimples.png")
+        textura_fim = criar_textura(*carregar_image("flapyBird/assets/YouDied.bmp"))
+        textura_vida = carregar_textura("flapyBird/assets/vida.png")
+        textura_dragao = carregar_textura("flapyBird/assets/dragon1.png")
     except Exception as e:
         print(f"Erro nas texturas, veja aqui")
         glfw.terminate()
@@ -65,6 +65,7 @@ def main():
         nonlocal tuneis, vidas_extras, vidas, contador_tuneis, velocidade, y_dragao
         if key == glfw.KEY_SPACE and action == glfw.PRESS:
             if estado == "inicio":
+                tunel_intervalo = TUNEL_INTERVALO
                 estado = "jogando"
                 inicio_jogo = time.time()
                 frame_anterior = time.time()
@@ -76,6 +77,8 @@ def main():
                 y_dragao = 300
             elif estado == "fim":
                 estado = "inicio"
+                tunel_velocidade = TUNEL_VELOCIDADE_INICIAL
+                tunel_intervalo = TUNEL_INTERVALO
 
     glfw.set_key_callback(window, key_callback)
 
@@ -113,12 +116,14 @@ def main():
             # dragao.desenhar()
 
             if tempo_atual - ultimo_tunel > tunel_intervalo:
-                tuneis.append(Tunel())
+                novo_tunel = Tunel()
+                tuneis.append(novo_tunel)
 
                 if contador_tuneis % 5 == 0:
-                    y_aleatorio = random.randint(150, ALTURA - 150)
-                    vidas_extras.append(VidaExtra(LARGURA, y_aleatorio, textura_vida))
-
+                    abertura_y = (novo_tunel.abertura_superior + novo_tunel.abertura_inferior) / 2
+                    y_vida = abertura_y - 16 
+                    vidas_extras.append(VidaExtra(LARGURA, y_vida, textura_vida))
+ 
                 ultimo_tunel = tempo_atual
 
             glPushAttrib(GL_ENABLE_BIT)
@@ -164,7 +169,11 @@ def main():
             if contador_tuneis % 10 == 0 and contador_tuneis != 0:
                 if (contador_tuneis // 10) > ((contador_tuneis - 1) // 10):
                     tunel_velocidade += 7
-                    tunel_intervalo = max(0.8, tunel_intervalo - 0.1)
+                    if contador_tuneis < 20:
+                        tunel_intervalo = max(1, tunel_intervalo - 0.1)
+                    else:
+                        tunel_intervalo = 0.8
+
 
  
             # if tempo_atual - inicio_jogo > 200:

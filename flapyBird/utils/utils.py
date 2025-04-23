@@ -50,7 +50,6 @@ def desenhar_fundo_invertido(textura_id, largura, altura):
         glColor4f(1.0, 1.0, 1.0, 1.0)
 
         glBegin(GL_QUADS)
-        # Invertemos o eixo Y das coordenadas da textura aqui
         glTexCoord2f(0.0, 0.0);glVertex2f(0, 0)
         glTexCoord2f(1.0, 0.0); glVertex2f(largura, 0)
         glTexCoord2f(1.0, 1.0);glVertex2f(largura, altura)

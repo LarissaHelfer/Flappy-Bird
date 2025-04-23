@@ -7,6 +7,8 @@ class Tunel:
         self.x = LARGURA
         self.largura = TUNEL_LARGURA
         self.gap_y = random.randint(150, ALTURA - 150)
+        self.abertura_inferior = self.gap_y - TUNEL_GAP / 2
+        self.abertura_superior = self.gap_y + TUNEL_GAP / 2
         self.passou = False
 
     def atualiza(self, delta_tempo):
@@ -16,7 +18,7 @@ class Tunel:
         return self.x + self.largura < 0
 
     def verifica_colisao(self, hitbox_dragao):
-        # Pega os limites do dragão
+        # limites do dragão
         x1 = hitbox_dragao["x1"]
         x2 = hitbox_dragao["x2"]
         y1 = hitbox_dragao["y1"]
