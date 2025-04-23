@@ -8,7 +8,7 @@ from config import *
 from objetos.tunel import Tunel
 from objetos.extras import VidaExtra
 from objetos.dragao import desenhar_dragao, carregar_textura, get_hitbox
-from utils.utils import carregar_image, criar_textura, desenhar_fundo, desenhar_texto
+from utils.utils import carregar_image, criar_textura, desenhar_fundo, desenhar_texto, desenhar_fundo_invertido
 
 def main():
     if not glfw.init():
@@ -33,11 +33,11 @@ def main():
     glLoadIdentity()
 
     try:
-        textura_inicio = criar_textura(*carregar_image("flapyBird/assets/FrameInicial.png"))
-        textura_jogo = criar_textura(*carregar_image("flapyBird/assets/FrameContinuo.png"))
-        textura_fim = criar_textura(*carregar_image("flapyBird/assets/YouDied.bmp"))
-        textura_vida = carregar_textura("flapyBird/assets/vida.png")
-        textura_dragao = carregar_textura("flapyBird/assets/dragon1.png")
+        textura_inicio = criar_textura(*carregar_image("assets/FrameInicial.png"))
+        textura_jogo = carregar_textura("assets/fundoSimples.png")
+        textura_fim = criar_textura(*carregar_image("assets/YouDied.bmp"))
+        textura_vida = carregar_textura("assets/vida.png")
+        textura_dragao = carregar_textura("assets/dragon1.png")
     except Exception as e:
         print(f"Erro nas texturas, veja aqui")
         glfw.terminate()
@@ -107,7 +107,7 @@ def main():
             glColor4f(1.0, 1.0, 1.0, 1.0)
 
         elif estado == "jogando":
-            desenhar_fundo(textura_jogo, LARGURA, ALTURA)
+            desenhar_fundo_invertido(textura_jogo, LARGURA, ALTURA)
             desenhar_dragao(textura_dragao, y_dragao)
             # dragao.atualizar(delta_tempo)
             # dragao.desenhar()

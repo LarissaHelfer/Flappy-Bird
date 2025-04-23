@@ -41,6 +41,24 @@ def desenhar_fundo(textura_id, largura, altura):
 
     glPopAttrib()
 
+def desenhar_fundo_invertido(textura_id, largura, altura):
+        glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT)
+
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, textura_id)
+
+        glColor4f(1.0, 1.0, 1.0, 1.0)
+
+        glBegin(GL_QUADS)
+        # Invertemos o eixo Y das coordenadas da textura aqui
+        glTexCoord2f(0.0, 0.0);glVertex2f(0, 0)
+        glTexCoord2f(1.0, 0.0); glVertex2f(largura, 0)
+        glTexCoord2f(1.0, 1.0);glVertex2f(largura, altura)
+        glTexCoord2f(0.0, 1.0);glVertex2f(0, altura)
+        glEnd()
+
+        glPopAttrib()
+
 def desenhar_texto(x, y, texto, tamanho=24, cor=(255, 255, 255)):
     fonte = ImageFont.truetype("arial.ttf", tamanho)
     
