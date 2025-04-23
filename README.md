@@ -30,3 +30,6 @@ Certifique-se de ter o Python 3 e os pacotes necessários instalados:
 Dentro do diretório flapyBird, execute:
 
     python main.py
+ ou 
+
+    py main.py
