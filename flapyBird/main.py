@@ -42,7 +42,8 @@ def main():
         print(f"Erro nas texturas, veja aqui")
         glfw.terminate()
         return
-    
+
+    # Variáveis do jogo
     tunel_velocidade = TUNEL_VELOCIDADE_INICIAL
     tunel_intervalo = TUNEL_INTERVALO
     estado = "inicio"
@@ -60,25 +61,39 @@ def main():
     invulneravel = False
     tempo_invulneravel = 0
 
+    def reiniciar_jogo():
+        nonlocal tunel_velocidade, tunel_intervalo, estado, tuneis, vidas_extras
+        nonlocal ultimo_tunel, frame_anterior, inicio_jogo, contador_tuneis
+        nonlocal vidas, y_dragao, velocidade, colidindo_agora, colidiu_anteriormente
+        nonlocal invulneravel, tempo_invulneravel
+
+        tunel_velocidade = TUNEL_VELOCIDADE_INICIAL
+        tunel_intervalo = TUNEL_INTERVALO
+        estado = "inicio"
+        tuneis = []
+        vidas_extras = []
+        ultimo_tunel = time.time()
+        frame_anterior = time.time()
+        inicio_jogo = None
+        contador_tuneis = 0
+        vidas = 3
+        y_dragao = 300
+        velocidade = 0
+        colidindo_agora = False
+        colidiu_anteriormente = False
+        invulneravel = False
+        tempo_invulneravel = 0
+
     def key_callback(window, key, scancode, action, mods):
-        nonlocal estado, ultimo_tunel, frame_anterior, inicio_jogo
-        nonlocal tuneis, vidas_extras, vidas, contador_tuneis, velocidade, y_dragao
+        nonlocal estado, inicio_jogo, frame_anterior, velocidade
         if key == glfw.KEY_SPACE and action == glfw.PRESS:
             if estado == "inicio":
-                tunel_intervalo = TUNEL_INTERVALO
                 estado = "jogando"
                 inicio_jogo = time.time()
                 frame_anterior = time.time()
-                tuneis = []
-                vidas_extras = []
-                vidas = 3
-                contador_tuneis = 0
                 velocidade = IMPULSO
-                y_dragao = 300
             elif estado == "fim":
-                estado = "inicio"
-                tunel_velocidade = TUNEL_VELOCIDADE_INICIAL
-                tunel_intervalo = TUNEL_INTERVALO
+                reiniciar_jogo()
 
     glfw.set_key_callback(window, key_callback)
 
@@ -93,7 +108,7 @@ def main():
         delta_tempo = tempo_atual - frame_anterior
         frame_anterior = tempo_atual
 
-        if invulneravel and tempo_atual - tempo_invulneravel > 1:  # 1 segundo de invulnerabilidade
+        if invulneravel and tempo_atual - tempo_invulneravel > 1:
             invulneravel = False
 
         if estado == "inicio":
@@ -106,14 +121,12 @@ def main():
             glEnable(GL_BLEND)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
             glColor4f(1.0, 1.0, 1.0, alpha)
-            desenhar_texto(LARGURA // 2 - 60, ALTURA // 2 -(-50), "START", tamanho=32)
+            desenhar_texto(LARGURA // 2 - 60, ALTURA // 2 - (-50), "START", tamanho=32)
             glColor4f(1.0, 1.0, 1.0, 1.0)
 
         elif estado == "jogando":
             desenhar_fundo_invertido(textura_jogo, LARGURA, ALTURA)
             desenhar_dragao(textura_dragao, y_dragao)
-            # dragao.atualizar(delta_tempo)
-            # dragao.desenhar()
 
             if tempo_atual - ultimo_tunel > tunel_intervalo:
                 novo_tunel = Tunel()
@@ -121,13 +134,12 @@ def main():
 
                 if contador_tuneis % 5 == 0:
                     abertura_y = (novo_tunel.abertura_superior + novo_tunel.abertura_inferior) / 2
-                    y_vida = abertura_y - 16 
+                    y_vida = abertura_y - 16
                     vidas_extras.append(VidaExtra(LARGURA, y_vida, textura_vida))
- 
+
                 ultimo_tunel = tempo_atual
 
             glPushAttrib(GL_ENABLE_BIT)
-
             hitbox_dragao = get_hitbox(y_dragao)
 
             for tunel in tuneis[:]:
@@ -165,7 +177,6 @@ def main():
                 if not vida.visivel:
                     vidas_extras.remove(vida)
 
-            # aqui dificulta
             if contador_tuneis % 10 == 0 and contador_tuneis != 0:
                 if (contador_tuneis // 10) > ((contador_tuneis - 1) // 10):
                     tunel_velocidade += 7
@@ -173,11 +184,6 @@ def main():
                         tunel_intervalo = max(1, tunel_intervalo - 0.1)
                     else:
                         tunel_intervalo = 0.8
-
-
- 
-            # if tempo_atual - inicio_jogo > 200:
-            #     estado = "fim"
 
             velocidade += GRAVIDADE * delta_tempo
             y_dragao += velocidade * delta_tempo
@@ -194,7 +200,7 @@ def main():
 
             glColor3f(1.0, 1.0, 1.0)
             for i in range(vidas):
-                x_vida = 20 + i * 40  # Espaçamento horizontal entre os corações
+                x_vida = 20 + i * 40
                 y_vida = ALTURA - 40
                 glBindTexture(GL_TEXTURE_2D, textura_vida)
                 glEnable(GL_TEXTURE_2D)
@@ -207,8 +213,8 @@ def main():
                 glEnd()
 
                 glDisable(GL_TEXTURE_2D)
-            desenhar_texto(20, ALTURA - 80, f"Pontos: {contador_tuneis}", tamanho=28)
 
+            desenhar_texto(20, ALTURA - 80, f"Pontos: {contador_tuneis}", tamanho=28)
 
         elif estado == "fim":
             desenhar_fundo(textura_fim, LARGURA, ALTURA)
