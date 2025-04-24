@@ -33,3 +33,9 @@ Dentro do diretório flapyBird, execute:
  ou 
 
     py main.py
+
+## Problemas na execução
+
+Caso rode o projeto pelo pyCharme deve ser removido na main.py na parte das texturas o "flapyBird/" assim eviitando erro de texturas
+
+exemplo: textura_jogo = carregar_textura("flapyBird/assets/fundoSimples.png")  deve modificar para ficar assim: textura_jogo = carregar_textura("assets/fundoSimples.png")
